@@ -13,6 +13,7 @@ from sklearn.ensemble import (AdaBoostRegressor, BaggingRegressor,
 from sklearn.linear_model import Ridge
 from sklearn.tree import DecisionTreeRegressor
 from lightgbm import LGBMRegressor
+from catboost import CatBoostRegressor
 
 
 class Regressor():
@@ -23,7 +24,7 @@ class Regressor():
     strategy : str, default = "LightGBM"
         The choice for the regressor.
         Available strategies = {"LightGBM", "RandomForest", "ExtraTrees",
-        "Tree", "Bagging", "AdaBoost" or "Linear"}
+        "Tree", "Bagging", "AdaBoost", "Linear" or, "CatBoost"}
 
     **params : default = None
         Parameters of the corresponding regressor.
@@ -127,12 +128,16 @@ class Regressor():
             self.__regressor = Ridge(
                 alpha=1.0, fit_intercept=True, normalize=False, copy_X=True,
                 max_iter=None, tol=0.001, solver='auto', random_state=0)
-
+        
+        elif(strategy == "CatBoost"):
+            self.__regressor = CatBoostRegressor(
+                iterations=100, learning_rate=0.05, depth=None, silent=True)
+                
         else:
             raise ValueError(
                 "Strategy invalid. Please choose between 'LightGBM'"
                 ", 'RandomForest', 'ExtraTrees', "
-                "'Tree', 'Bagging', 'AdaBoost' or 'Linear'")
+                "'Tree', 'Bagging', 'AdaBoost', 'Linear' or 'CatBoost'")
 
     def fit(self, df_train, y_train):
         """Fits Regressor.
@@ -188,7 +193,7 @@ class Regressor():
                     importance[col] = f[i]
 
             elif (self.get_params()["strategy"] in ["LightGBM", "RandomForest",
-                                                    "ExtraTrees", "Tree"]):
+                                                    "ExtraTrees", "Tree", "CatBoost"]):
 
                 importance = {}
                 f = self.get_estimator().feature_importances_
